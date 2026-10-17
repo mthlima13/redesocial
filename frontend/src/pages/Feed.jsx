@@ -12,10 +12,11 @@ export default function Feed() {
   const [carregando, setCarregando] = useState(true);
   const [carregandoInicial, setCarregandoInicial] = useState(true);
   const [temMais, setTemMais] = useState(true);
+  const [abordagem, setAbordagem] = useState('todos'); // 'todos' | 'seguidos'
 
   useEffect(() => {
     carregarFeed(0);
-  }, []);
+  }, [abordagem]);
 
   const carregarFeed = async (pagina) => {
     if (carregando) return;
@@ -25,7 +26,14 @@ export default function Feed() {
       setCarregando(true);
     }
     try {
-      const res = await postService.listarFeed({ page: pagina, size: 10 });
+      const params = {
+        page: pagina,
+        size: 10,
+      };
+      if (abordagem === 'seguidos') {
+        params.seguidos = 'true';
+      }
+      const res = await postService.listarFeed(params);
       const novos = res.data.content;
       if (pagina === 0) {
         setPosts(novos);
@@ -47,7 +55,6 @@ export default function Feed() {
     setPage(page + 1);
   };
 
-  // Renderiza skeletons enquanto carrega inicialmente
   const renderSkeletons = () => {
     return (
       <div className="space-y-6">
@@ -72,6 +79,36 @@ export default function Feed() {
         </Link>
       </div>
 
+      {/* Filtro Todos / Seguidos */}
+      <div className="flex gap-2 mb-6">
+        <button
+          onClick={() => {
+            setAbordagem('todos');
+            setPage(0);
+          }}
+          className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
+            abordagem === 'todos'
+              ? 'bg-instadog-600 text-white'
+              : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+          }`}
+        >
+          Todos
+        </button>
+        <button
+          onClick={() => {
+            setAbordagem('seguidos');
+            setPage(0);
+          }}
+          className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
+            abordagem === 'seguidos'
+              ? 'bg-instadog-600 text-white'
+              : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+          }`}
+        >
+          Seguidos
+        </button>
+      </div>
+
       {carregandoInicial && renderSkeletons()}
 
       {!carregandoInicial && posts.length === 0 && (
@@ -79,10 +116,18 @@ export default function Feed() {
           <div className="w-16 h-16 bg-gray-100 rounded-full mx-auto mb-4 flex items-center justify-center">
             <span className="text-2xl">🐾</span>
           </div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">Nenhum post ainda</h3>
-          <p className="text-gray-500 text-sm mb-6">
-            Seja o primeiro a compartilhar uma foto do seu cão!
-          </p>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">
+            {abordagem === 'seguidos' ? 'Nenhum post de quem você segue' : 'Nenhum post ainda'}
+          </h3>
+          {abordagem === 'seguidos' ? (
+            <p className="text-gray-500 text-sm mb-6">
+              Comece a seguir outros tutores para ver seus posts aqui.
+            </p>
+          ) : (
+            <p className="text-gray-500 text-sm mb-6">
+              Seja o primeiro a compartilhar uma foto do seu cão!
+            </p>
+          )}
           <Link to="/criar-post" className="btn-primary">
             Criar primeiro post
           </Link>
@@ -92,7 +137,7 @@ export default function Feed() {
       {!carregandoInicial && posts.length > 0 && (
         <>
           {posts.map((post) => (
-            <PostCard key={post.id} post={post} />
+            <PostCard key={post.id} post={post} onLikeChange={carregarFeed} />
           ))}
 
           {carregando && (

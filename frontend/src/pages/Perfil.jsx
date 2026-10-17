@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { usuarioService, caoService } from '../services/usuarios';
+import { seguirService } from '../services/posts';
 
 export default function Perfil() {
   const { user, logout, atualizarPerfil } = useAuth();
   const [perfil, setPerfil] = useState(null);
   const [caos, setCaos] = useState([]);
+  const [seguidoresCount, setSeguidoresCount] = useState(0);
   const [edicao, setEdicao] = useState(false);
   const [form, setForm] = useState({});
 
@@ -18,6 +20,12 @@ export default function Perfil() {
       const res = await usuarioService.getPerfil();
       setPerfil(res.data);
       setForm({ ...res.data });
+    } catch (e) {
+      console.error(e);
+    }
+    try {
+      const res = await seguirService.contarSeguidores(user.id);
+      setSeguidoresCount(res.data);
     } catch (e) {
       console.error(e);
     }
@@ -94,6 +102,9 @@ export default function Perfil() {
             <p className="text-gray-600">{perfil?.bio || 'Sem bio ainda.'}</p>
             <p className="mt-2 text-sm text-gray-500">
               Membro desde {perfil?.criadoEm ? new Date(perfil.criadoEm).toLocaleDateString('pt-BR') : ''}
+            </p>
+            <p className="mt-1 text-sm text-gray-500">
+              {seguidoresCount} seguidor{seguidoresCount !== 1 ? 'es' : ''}
             </p>
           </div>
 

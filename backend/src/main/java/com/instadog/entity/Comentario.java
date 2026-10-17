@@ -1,6 +1,7 @@
 package com.instadog.entity;
 
 import jakarta.persistence.*;
+import jakarta.persistence.Index;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -8,7 +9,10 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "comentarios")
+@Table(name = "comentarios", indexes = {
+    @Index(name = "idx_comentarios_post_id", columnList = "post_id"),
+    @Index(name = "idx_comentarios_criado_em", columnList = "criado_em")
+})
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

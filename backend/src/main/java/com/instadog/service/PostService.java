@@ -15,6 +15,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -60,6 +62,14 @@ public class PostService {
 
     public Page<PostResponse> listarPorUsuario(Long usuarioId, Pageable pageable, Long usuarioLogadoId) {
         Page<Post> posts = postRepository.findByUsuarioIdOrderByCriadoEmDesc(usuarioId, pageable);
+        return posts.map(post -> toResponse(post, usuarioLogadoId));
+    }
+
+    public Page<PostResponse> listarFeedSeguidos(List<Long> idsSeguidos, Pageable pageable, Long usuarioLogadoId) {
+        if (idsSeguidos == null || idsSeguidos.isEmpty()) {
+            return org.springframework.data.domain.Page.empty(pageable);
+        }
+        Page<Post> posts = postRepository.findByUsuarioIdInOrderByCriadoEmDesc(idsSeguidos, pageable);
         return posts.map(post -> toResponse(post, usuarioLogadoId));
     }
 

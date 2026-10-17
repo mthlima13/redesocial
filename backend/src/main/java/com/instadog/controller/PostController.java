@@ -5,6 +5,7 @@ import com.instadog.dto.PostResponse;
 import com.instadog.security.UserDetailsImpl;
 import com.instadog.service.FileStorageService;
 import com.instadog.service.PostService;
+import com.instadog.service.SeguirService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -24,6 +25,7 @@ public class PostController {
 
     private final PostService postService;
     private final FileStorageService fileStorageService;
+    private final SeguirService seguirService;
 
     @PostMapping
     public ResponseEntity<PostResponse> criar(
@@ -44,9 +46,16 @@ public class PostController {
     @GetMapping
     public ResponseEntity<PageableResponse<PostResponse>> listarFeed(
             @AuthenticationPrincipal UserDetailsImpl userDetails,
-            @PageableDefault(size = 10, sort = "criadoEm") Pageable pageable) {
-        var page = postService.listarFeed(pageable, userDetails.getId());
-        return ResponseEntity.ok(new PageableResponse<>(page));
+            @PageableDefault(size = 10, sort = "criadoEm") Pageable pageable,
+            @RequestParam(required = false) Boolean seguidos) {
+        PageableResponse<PostResponse> page;
+        if (Boolean.TRUE.equals(seguidos)) {
+            var idsSeguidos = seguirService.listarIdsSeguidos(userDetails.getId());
+            page = new PageableResponse<>(postService.listarFeedSeguidos(idsSeguidos, pageable, userDetails.getId()));
+        } else {
+            page = new PageableResponse<>(postService.listarFeed(pageable, userDetails.getId()));
+        }
+        return ResponseEntity.ok(page);
     }
 
     @GetMapping("/usuario/{usuarioId}")

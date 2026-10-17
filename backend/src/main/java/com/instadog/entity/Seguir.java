@@ -1,6 +1,7 @@
 package com.instadog.entity;
 
 import jakarta.persistence.*;
+import jakarta.persistence.Index;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -9,6 +10,9 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "seguir", uniqueConstraints = {
     @UniqueConstraint(columnNames = {"seguidor_id", "seguido_id"})
+}, indexes = {
+    @Index(name = "idx_seguir_seguidor_id", columnList = "seguidor_id"),
+    @Index(name = "idx_seguir_seguido_id", columnList = "seguido_id")
 })
 @Data
 @NoArgsConstructor
