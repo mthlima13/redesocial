@@ -33,8 +33,8 @@ public class AuthService {
         Usuario usuario = Usuario.builder()
                 .nome(request.getNome())
                 .email(request.getEmail())
-                .senha(org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
-                        .getDefault().encode(request.getSenha()))
+                .senha(new org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder()
+                        .encode(request.getSenha()))
                 .cidade(request.getCidade())
                 .bio(request.getBio())
                 .ativo(true)

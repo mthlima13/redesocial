@@ -3,6 +3,12 @@ import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { usuarioService, caoService } from '../services/usuarios';
 import { seguirService } from '../services/posts';
+import Button from '../components/ui/Button.jsx';
+import Input from '../components/ui/Input.jsx';
+import Card from '../components/ui/Card.jsx';
+import Avatar from '../components/ui/Avatar.jsx';
+import Badge from '../components/ui/Badge.jsx';
+import LoadingSpinner from '../components/ui/LoadingSpinner.jsx';
 
 export default function Perfil() {
   const { user, logout, atualizarPerfil } = useAuth();
@@ -91,27 +97,33 @@ export default function Perfil() {
     }
   };
 
+  if (!perfil) {
+    return (
+      <div className="max-w-3xl mx-auto py-8 px-4">
+        <div className="flex items-center justify-center h-64">
+          <LoadingSpinner size="lg" text="Carregando perfil..." />
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="max-w-3xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+    <div className="max-w-3xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
       <div className="flex justify-between items-end mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">{perfil?.nome || 'Perfil'}</h1>
-          <p className="text-gray-600">{perfil?.cidade || ''}</p>
+          <h1 className="text-3xl font-bold text-neutral-900">{perfil.nome || 'Perfil'}</h1>
+          {perfil.cidade && (
+            <p className="text-neutral-500">{perfil.cidade}</p>
+          )}
         </div>
         {!edicao ? (
-          <button
-            onClick={() => setEdicao(true)}
-            className="btn-outline"
-          >
+          <Button variant="outline" onClick={() => setEdicao(true)}>
             Editar perfil
-          </button>
+          </Button>
         ) : (
-          <button
-            onClick={() => setEdicao(false)}
-            className="btn-outline"
-          >
+          <Button variant="outline" onClick={() => setEdicao(false)}>
             Cancelar
-          </button>
+          </Button>
         )}
       </div>
 
@@ -127,7 +139,7 @@ export default function Perfil() {
                 />
               )}
               {!fotoPreview && (
-                <div className="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center border-2 border-instadog-600">
+                <div className="w-24 h-24 rounded-full bg-neutral-200 flex items-center justify-center border-2 border-instadog-600">
                   <span className="text-instadog-600 text-lg">🐾</span>
                 </div>
               )}
@@ -159,95 +171,88 @@ export default function Perfil() {
             </button>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Nome</label>
-            <input
-              className="input-field focus-visible-ring"
-              value={form.nome || ''}
-              onChange={(e) => setForm({ ...form, nome: e.target.value })}
-              aria-label="Nome"
-              required
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Cidade</label>
-            <input
-              className="input-field focus-visible-ring"
-              value={form.cidade || ''}
-              onChange={(e) => setForm({ ...form, cidade: e.target.value })}
-              aria-label="Cidade"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Bio</label>
-            <textarea
-              className="input-field focus-visible-ring"
-              value={form.bio || ''}
-              onChange={(e) => setForm({ ...form, bio: e.target.value })}
-              rows={3}
-              aria-label="Biografia"
-            />
-          </div>
-          <button
+          <Input
+            label="Nome"
+            value={form.nome || ''}
+            onChange={(e) => setForm({ ...form, nome: e.target.value })}
+            aria-label="Nome"
+            required
+          />
+          <Input
+            label="Cidade"
+            value={form.cidade || ''}
+            onChange={(e) => setForm({ ...form, cidade: e.target.value })}
+            aria-label="Cidade"
+          />
+          <Input
+            label="Bio"
+            as="textarea"
+            rows={3}
+            value={form.bio || ''}
+            onChange={(e) => setForm({ ...form, bio: e.target.value })}
+            aria-label="Biografia"
+          />
+          <Button
             type="submit"
-            className="btn-primary w-full"
+            variant="primary"
+            className="w-full"
           >
             Salvar alterações
-          </button>
+          </Button>
         </form>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="card p-6">
+          <Card className="shadow-sm" padding="p-6">
             <div className="flex items-center gap-4 mb-6">
-              {perfil?.fotoUrl && (
+              {perfil.fotoUrl && (
                 <img
                   src={perfil.fotoUrl}
-                  alt="Foto de perfil de {perfil.nome}"
-                  className="w-16 h-16 rounded-full object-cover bg-gray-200"
+                  alt={`Foto de perfil de ${perfil.nome}`}
+                  className="w-16 h-16 rounded-full object-cover bg-neutral-200 border border-neutral-200"
                 />
               )}
-              {!perfil?.fotoUrl && (
-                <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center">
+              {!perfil.fotoUrl && (
+                <div className="w-16 h-16 rounded-full bg-neutral-200 flex items-center justify-center border border-neutral-200">
                   <span className="text-xl">🐾</span>
                 </div>
               )}
               <div>
-                <h2 className="text-lg font-semibold">{perfil?.nome || 'Usuário'}</h2>
-                <p className="text-sm text-gray-500">{perfil?.cidade || ''}</p>
+                <h2 className="text-lg font-semibold text-neutral-900">{perfil.nome || 'Usuário'}</h2>
+                {perfil.cidade && <p className="text-sm text-neutral-500">{perfil.cidade}</p>}
               </div>
             </div>
-            <h3 className="text-base font-semibold mb-2">Sobre</h3>
-            <p className="text-gray-600">{perfil?.bio || 'Sem bio ainda.'}</p>
-            <div className="mt-4 pt-4 border-t border-gray-100">
-              <p className="text-sm text-gray-500">
+            <h3 className="text-base font-semibold mb-2 text-neutral-900">Sobre</h3>
+            <p className="text-neutral-600">{perfil.bio || 'Sem bio ainda.'}</p>
+            <div className="mt-4 pt-4 border-t border-neutral-100">
+              <p className="text-sm text-neutral-500">
                 Membro desde{' '}
-                {perfil?.criadoEm ? new Date(perfil.criadoEm).toLocaleDateString('pt-BR') : ''}
+                {perfil.criadoEm ? new Date(perfil.criadoEm).toLocaleDateString('pt-BR') : ''}
               </p>
-              <p className="text-sm text-gray-500 mt-1">
+              <p className="text-sm text-neutral-500 mt-1">
                 {seguidoresCount} seguidor{seguidoresCount !== 1 ? 'es' : ''}
               </p>
             </div>
-          </div>
+          </Card>
 
-          <div className="card p-6">
-            <h2 className="text-lg font-semibold mb-4">Seus cães</h2>
+          <Card className="shadow-sm" padding="p-6">
+            <h2 className="text-lg font-semibold mb-4 text-neutral-900">Seus cães</h2>
             {caos.length === 0 && (
-              <p className="text-gray-500 text-sm">Nenhum cão cadastrado.</p>
+              <p className="text-neutral-500 text-sm">Nenhum cão cadastrado.</p>
             )}
             {caos.map((cao) => (
-              <div key={cao.id} className="mb-4 p-3 bg-gray-50 rounded-lg border border-gray-100">
-                <p className="font-semibold">{cao.nome}</p>
-                <p className="text-sm text-gray-600">
+              <div key={cao.id} className="mb-4 p-3 bg-neutral-50 rounded-lg border border-neutral-100">
+                <p className="font-semibold text-neutral-900">{cao.nome}</p>
+                <p className="text-sm text-neutral-600">
                   {cao.raca || ''} • {cao.porte || ''}
                 </p>
               </div>
             ))}
-          </div>
+          </Card>
 
           <div className="col-span-1 md:col-span-2">
             <button
               onClick={logout}
-              className="w-full py-3 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition focus:outline-none focus:ring-2 focus:ring-red-300"
+              className="w-full py-3 bg-error-500 text-white rounded-lg font-medium hover:bg-error-600 transition focus:outline-none focus:ring-2 focus:ring-error-300"
             >
               Excluir minha conta
             </button>

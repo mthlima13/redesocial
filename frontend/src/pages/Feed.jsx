@@ -4,6 +4,9 @@ import { useAuth } from '../context/AuthContext';
 import { postService } from '../services/posts';
 import PostCard from '../components/PostCard';
 import PostSkeleton from '../components/PostSkeleton';
+import Button from '../components/ui/Button.jsx';
+import EmptyState from '../components/ui/EmptyState.jsx';
+import LoadingSpinner from '../components/ui/LoadingSpinner.jsx';
 
 export default function Feed() {
   const { user } = useAuth();
@@ -65,73 +68,65 @@ export default function Feed() {
     );
   };
 
+  const filtroBtn = (ativo, label, onClick) => (
+    <button
+      onClick={onClick}
+      className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
+        ativo
+          ? 'bg-instadog-600 text-white'
+          : 'bg-white border border-neutral-300 text-neutral-700 hover:bg-neutral-50'
+      }`}
+    >
+      {label}
+    </button>
+  );
+
   return (
-    <div className="max-w-2xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-      <div className="flex justify-between items-center mb-6">
+    <div className="max-w-2xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+      <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Feed 🐾</h1>
-          <p className="text-sm text-gray-500">
+          <h1 className="text-2xl font-bold text-neutral-900">Feed 🐾</h1>
+          <p className="text-sm text-neutral-500">
             Bem-vindo, {user?.nome}
           </p>
         </div>
-        <Link to="/criar-post" className="btn-primary">
+        <Link to="/criar-post" className="btn-primary btn-sm">
           Nova publicação
         </Link>
       </div>
 
       {/* Filtro Todos / Seguidos */}
-      <div className="flex gap-2 mb-6">
-        <button
-          onClick={() => {
-            setAbordagem('todos');
-            setPage(0);
-          }}
-          className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
-            abordagem === 'todos'
-              ? 'bg-instadog-600 text-white'
-              : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
-          }`}
-        >
-          Todos
-        </button>
-        <button
-          onClick={() => {
-            setAbordagem('seguidos');
-            setPage(0);
-          }}
-          className={`px-4 py-2 rounded-lg text-sm font-medium transition ${
-            abordagem === 'seguidos'
-              ? 'bg-instadog-600 text-white'
-              : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
-          }`}
-        >
-          Seguidos
-        </button>
+      <div className="flex gap-2 mb-8">
+        {filtroBtn(
+          abordagem === 'todos',
+          'Todos',
+          () => { setAbordagem('todos'); setPage(0); }
+        )}
+        {filtroBtn(
+          abordagem === 'seguidos',
+          'Seguidos',
+          () => { setAbordagem('seguidos'); setPage(0); }
+        )}
       </div>
 
       {carregandoInicial && renderSkeletons()}
 
       {!carregandoInicial && posts.length === 0 && (
-        <div className="text-center py-20 bg-white rounded-xl border border-gray-200">
-          <div className="w-16 h-16 bg-gray-100 rounded-full mx-auto mb-4 flex items-center justify-center">
-            <span className="text-2xl">🐾</span>
-          </div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">
-            {abordagem === 'seguidos' ? 'Nenhum post de quem você segue' : 'Nenhum post ainda'}
-          </h3>
-          {abordagem === 'seguidos' ? (
-            <p className="text-gray-500 text-sm mb-6">
-              Comece a seguir outros tutores para ver seus posts aqui.
-            </p>
-          ) : (
-            <p className="text-gray-500 text-sm mb-6">
-              Seja o primeiro a compartilhar uma foto do seu cão!
-            </p>
-          )}
-          <Link to="/criar-post" className="btn-primary">
-            Criar primeiro post
-          </Link>
-        </div>
+        <EmptyState
+          icon="📭"
+          title={
+            abordagem === 'seguidos'
+              ? 'Nenhum post de quem você segue'
+              : 'Nenhum post ainda'
+          }
+          description={
+            abordagem === 'seguidos'
+              ? 'Comece a seguir outros tutores para ver seus posts aqui.'
+              : 'Seja o primeiro a compartilhar uma foto do seu cão!'
+          }
+          actionText="Criar primeiro post"
+          actionHref="/criar-post"
+        />
       )}
 
       {!carregandoInicial && posts.length > 0 && (
@@ -142,17 +137,19 @@ export default function Feed() {
 
           {carregando && (
             <div className="text-center py-4">
-              <PostSkeleton />
+              <LoadingSpinner size="md" text="Carregando mais..." />
             </div>
           )}
 
           {temMais && (
-            <button
+            <Button
               onClick={carregarMais}
-              className="w-full py-3 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition"
+              variant="outline"
+              className="w-full"
+              disabled={carregando}
             >
               Carregar mais
-            </button>
+            </Button>
           )}
         </>
       )}

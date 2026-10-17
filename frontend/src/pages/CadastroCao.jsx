@@ -2,6 +2,9 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { caoService } from '../services/usuarios';
+import Button from '../components/ui/Button.jsx';
+import Input from '../components/ui/Input.jsx';
+import Card from '../components/ui/Card.jsx';
 
 export default function CadastroCao() {
   const { user } = useAuth();
@@ -31,47 +34,44 @@ export default function CadastroCao() {
   };
 
   return (
-    <div className="max-w-lg mx-auto py-6 px-4">
-      <div className="card p-6">
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">Cadastrar cão 🐶</h2>
+    <div className="max-w-lg mx-auto py-8 px-4">
+      <Card className="shadow-lg" padding="p-6 sm:p-8">
+        <div className="flex items-center gap-3 mb-6">
+          <span className="text-2xl">🐶</span>
+          <h2 className="text-2xl font-bold text-neutral-900">Cadastrar cão</h2>
+        </div>
+
         {erro && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm mb-4">
+          <div className="bg-error-50 border border-error-100 text-error-700 px-4 py-3 rounded-lg text-sm mb-6">
             {erro}
           </div>
         )}
-        <form onSubmit={handleSubmit} className="space-y-4">
+
+        <form onSubmit={handleSubmit} className="space-y-5">
+          <Input
+            label="Nome"
+            placeholder="Rex"
+            value={form.nome}
+            onChange={(e) => setForm({ ...form, nome: e.target.value })}
+            required
+          />
+          <Input
+            label="Raça"
+            placeholder="Vira-lata"
+            value={form.raca}
+            onChange={(e) => setForm({ ...form, raca: e.target.value })}
+          />
+          <Input
+            label="Data de nascimento"
+            type="date"
+            value={form.dataNascimento}
+            onChange={(e) => setForm({ ...form, dataNascimento: e.target.value })}
+          />
           <div>
-            <label className="block text-sm font-medium text-gray-700">Nome</label>
-            <input
-              className="input-field"
-              value={form.nome}
-              onChange={(e) => setForm({ ...form, nome: e.target.value })}
-              placeholder="Rex"
-              required
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Raça</label>
-            <input
-              className="input-field"
-              value={form.raca}
-              onChange={(e) => setForm({ ...form, raca: e.target.value })}
-              placeholder="Vira-lata"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Data de nascimento</label>
-            <input
-              className="input-field"
-              type="date"
-              value={form.dataNascimento}
-              onChange={(e) => setForm({ ...form, dataNascimento: e.target.value })}
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Porte</label>
+            <label className="label" htmlFor="porte">Porte</label>
             <select
-              className="input-field"
+              id="porte"
+              className="input"
               value={form.porte}
               onChange={(e) => setForm({ ...form, porte: e.target.value })}
             >
@@ -81,25 +81,25 @@ export default function CadastroCao() {
               <option value="Grande">Grande</option>
             </select>
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">Bio</label>
-            <textarea
-              className="input-field"
-              value={form.bio}
-              onChange={(e) => setForm({ ...form, bio: e.target.value })}
-              rows={3}
-              placeholder="Conte um pouco sobre seu cão"
-            />
-          </div>
-          <button
+          <Input
+            label="Bio"
+            as="textarea"
+            rows={3}
+            placeholder="Conte um pouco sobre seu cão"
+            value={form.bio}
+            onChange={(e) => setForm({ ...form, bio: e.target.value })}
+          />
+
+          <Button
             type="submit"
-            disabled={carregando}
-            className="btn-primary w-full"
+            variant="primary"
+            className="w-full"
+            loading={carregando}
           >
             {carregando ? 'Cadastrando...' : 'Cadastrar cão'}
-          </button>
+          </Button>
         </form>
-      </div>
+      </Card>
     </div>
   );
 }

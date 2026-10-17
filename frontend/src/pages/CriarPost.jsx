@@ -4,6 +4,9 @@ import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { postService } from '../services/posts';
 import { caoService } from '../services/usuarios';
+import Button from '../components/ui/Button.jsx';
+import Input from '../components/ui/Input.jsx';
+import Card from '../components/ui/Card.jsx';
 
 export default function CriarPost() {
   const { user } = useAuth();
@@ -67,26 +70,31 @@ export default function CriarPost() {
     }
   };
 
+  const removerImagem = () => {
+    setImagem(null);
+    setImagemUrl('');
+    setPreview(null);
+  };
+
   return (
-    <div className="max-w-lg mx-auto py-6 px-4">
-      <div className="card p-6">
+    <div className="max-w-lg mx-auto py-8 px-4">
+      <Card className="shadow-lg" padding="p-6 sm:p-8">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-gray-900">Criar post 📸</h2>
+          <h2 className="text-2xl font-bold text-neutral-900">Criar post 📸</h2>
           <button
             onClick={() => navigate('/feed')}
-            className="text-sm text-gray-600 hover:text-instadog-600 focus:outline-none focus:text-instadog-600"
+            className="text-sm text-neutral-600 hover:text-instadog-600 hover:underline"
           >
             Cancelar
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Escolha o cão
-            </label>
+            <label className="label" htmlFor="caoId">Escolha o cão</label>
             <select
-              className="input-field focus-visible-ring"
+              id="caoId"
+              className="input"
               value={caoId}
               onChange={(e) => setCaoId(e.target.value)}
               required
@@ -101,28 +109,23 @@ export default function CriarPost() {
             </select>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Descrição
-            </label>
-            <textarea
-              className="input-field focus-visible-ring"
-              value={descricao}
-              onChange={(e) => setDescricao(e.target.value)}
-              rows={3}
-              placeholder="O que seu cão está aprontando?"
-              maxLength={500}
-              aria-label="Descrição do post"
-            />
-          </div>
+          <Input
+            label="Descrição"
+            as="textarea"
+            rows={3}
+            placeholder="O que seu cão está aprontando?"
+            maxLength={500}
+            value={descricao}
+            onChange={(e) => setDescricao(e.target.value)}
+            aria-label="Descrição do post"
+          />
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Foto (opcional)
-            </label>
+            <label className="label" htmlFor="foto">Foto (opcional)</label>
             <div className="flex items-center gap-3">
               <input
-                className="block w-full text-sm text-gray-500
+                id="foto"
+                className="block w-full text-sm text-neutral-500
                   file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0
                   file:text-sm file:font-semibold file:bg-instadog-50 file:text-instadog-700
                   hover:file:bg-instadog-100 focus:outline-none"
@@ -136,16 +139,12 @@ export default function CriarPost() {
                   <img
                     src={preview}
                     alt="Pré-visualização da imagem"
-                    className="w-24 h-24 rounded-lg object-cover border border-gray-300"
+                    className="w-24 h-24 rounded-lg object-cover border border-neutral-300"
                   />
                   <button
                     type="button"
-                    onClick={() => {
-                      setImagem(null);
-                      setImagemUrl('');
-                      setPreview(null);
-                    }}
-                    className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500"
+                    onClick={removerImagem}
+                    className="absolute -top-1 -right-1 bg-error-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs hover:bg-error-600 focus:outline-none focus:ring-2 focus:ring-error-500"
                     title="Remover imagem"
                     aria-label="Remover imagem"
                   >
@@ -155,19 +154,21 @@ export default function CriarPost() {
               )}
             </div>
             {uploadando && (
-              <p className="text-xs text-gray-500 mt-1">Enviando imagem...</p>
+              <p className="text-xs text-neutral-500 mt-1">Enviando imagem...</p>
             )}
           </div>
 
-          <button
+          <Button
             type="submit"
+            variant="primary"
+            className="w-full"
             disabled={carregando || !caoId}
-            className="btn-primary w-full"
+            loading={carregando || uploadando}
           >
-            {carregando ? 'Publicando...' : 'Publicar'}
-          </button>
+            {carregando || uploadando ? 'Publicando...' : 'Publicar'}
+          </Button>
         </form>
-      </div>
+      </Card>
     </div>
   );
 }
