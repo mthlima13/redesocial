@@ -1,0 +1,49 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.iml
+.classpath
+.project
+.settings/
+
+# Java
+*.class
+*.jar
+*.war
+*.ear
+target/
+bin/
+!.gradle/wrapper/
+.gradle/
+
+# Node
+node_modules/
+.npm/
+.yarn/
+dist/
+build/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-store/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Certs / secrets
+*.pem
+*.key
+
+# OS generated
+*.db
+
+# Logs
+logs
+*.log
