@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 import { Logo } from '../components/Logo';
 
 export default function Cadastro() {
@@ -11,9 +12,9 @@ export default function Cadastro() {
     cidade: '',
     bio: '',
   });
-  const [erro, setErro] = useState('');
   const [carregando, setCarregando] = useState(false);
   const { cadastro, login } = useAuth();
+  const { sucesso, erro } = useToast();
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -22,14 +23,14 @@ export default function Cadastro() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setErro('');
     setCarregando(true);
     try {
       await cadastro(dados);
       await login(dados.email, dados.senha);
+      sucesso('Conta criada com sucesso!');
       navigate('/feed');
     } catch (err) {
-      setErro(err.response?.data?.mensagem || 'Erro ao cadastrar');
+      erro(err.response?.data?.mensagem || 'Erro ao cadastrar');
     } finally {
       setCarregando(false);
     }
@@ -46,41 +47,37 @@ export default function Cadastro() {
           </p>
         </div>
 
-        {erro && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
-            {erro}
-          </div>
-        )}
-
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700">Nome completo</label>
               <input
-                className="input-field"
+                className="input-field focus-visible-ring"
                 name="nome"
                 required
                 value={dados.nome}
                 onChange={handleChange}
                 placeholder="João Silva"
+                aria-label="Nome completo"
               />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700">E-mail</label>
               <input
-                className="input-field"
+                className="input-field focus-visible-ring"
                 name="email"
                 type="email"
                 required
                 value={dados.email}
                 onChange={handleChange}
                 placeholder="seu@email.com"
+                aria-label="E-mail"
               />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700">Senha</label>
               <input
-                className="input-field"
+                className="input-field focus-visible-ring"
                 name="senha"
                 type="password"
                 required
@@ -88,27 +85,30 @@ export default function Cadastro() {
                 value={dados.senha}
                 onChange={handleChange}
                 placeholder="••••••••"
+                aria-label="Senha"
               />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700">Cidade (opcional)</label>
               <input
-                className="input-field"
+                className="input-field focus-visible-ring"
                 name="cidade"
                 value={dados.cidade}
                 onChange={handleChange}
                 placeholder="São Paulo"
+                aria-label="Cidade"
               />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700">Bio (opcional)</label>
               <textarea
-                className="input-field"
+                className="input-field focus-visible-ring"
                 name="bio"
                 value={dados.bio}
                 onChange={handleChange}
                 placeholder="Conte um pouco sobre você e seus cães"
                 rows={3}
+                aria-label="Bio"
               />
             </div>
           </div>
@@ -124,7 +124,7 @@ export default function Cadastro() {
 
         <p className="text-center text-sm text-gray-600">
           Já tem uma conta?{' '}
-          <Link to="/login" className="font-medium text-instadog-600 hover:text-instadog-500">
+          <Link to="/login" className="font-medium text-instadog-600 hover:text-instadog-500 focus:underline">
             Entrar
           </Link>
         </p>

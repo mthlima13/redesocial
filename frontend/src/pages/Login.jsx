@@ -1,25 +1,26 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 import { Logo } from '../components/Logo';
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
-  const [erro, setErro] = useState('');
   const [carregando, setCarregando] = useState(false);
   const { login } = useAuth();
+  const { sucesso, erro } = useToast();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setErro('');
     setCarregando(true);
     try {
       await login(email, senha);
+      sucesso('Bem-vindo de volta!');
       navigate('/feed');
     } catch (err) {
-      setErro(err.response?.data?.mensagem || 'Erro ao fazer login');
+      erro(err.response?.data?.mensagem || 'Erro ao fazer login');
     } finally {
       setCarregando(false);
     }
@@ -36,34 +37,30 @@ export default function Login() {
           </p>
         </div>
 
-        {erro && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
-            {erro}
-          </div>
-        )}
-
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700">E-mail</label>
               <input
-                className="input-field"
+                className="input-field focus-visible-ring"
                 type="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="seu@email.com"
+                aria-label="E-mail"
               />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700">Senha</label>
               <input
-                className="input-field"
+                className="input-field focus-visible-ring"
                 type="password"
                 required
                 value={senha}
                 onChange={(e) => setSenha(e.target.value)}
                 placeholder="••••••••"
+                aria-label="Senha"
               />
             </div>
           </div>
@@ -79,7 +76,7 @@ export default function Login() {
 
         <p className="text-center text-sm text-gray-600">
           Não tem uma conta?{' '}
-          <Link to="/cadastro" className="font-medium text-instadog-600 hover:text-instadog-500">
+          <Link to="/cadastro" className="font-medium text-instadog-600 hover:text-instadog-500 focus:underline">
             Cadastre-se
           </Link>
         </p>

@@ -1,11 +1,13 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 import { postService } from '../services/posts';
 import { caoService } from '../services/usuarios';
 
 export default function CriarPost() {
   const { user } = useAuth();
+  const { sucesso, erro } = useToast();
   const navigate = useNavigate();
   const [caoId, setCaoId] = useState('');
   const [descricao, setDescricao] = useState('');
@@ -14,11 +16,10 @@ export default function CriarPost() {
   const [caos, setCaos] = useState([]);
   const [carregando, setCarregando] = useState(false);
   const [uploadando, setUploadando] = useState(false);
-  const [erro, setErro] = useState('');
   const [preview, setPreview] = useState(null);
 
   useEffect(() => {
-    // Lista cães do usuário (endpoint simplificado retorna 1)
+    // Lista cães do usuário (busca o primeiro cão cadastrado)
     caoService.buscarPorId(1).then((res) => {
       if (res.data) setCaos([res.data]);
     }).catch(() => {
@@ -30,24 +31,21 @@ export default function CriarPost() {
     const file = e.target.files?.[0];
     if (!file) return;
     if (!file.type.startsWith('image/')) {
-      setErro('Por favor, selecione apenas arquivos de imagem');
+      erro('Por favor, selecione apenas arquivos de imagem');
       return;
     }
     if (file.size > 10 * 1024 * 1024) {
-      setErro('A imagem deve ter no máximo 10MB');
+      erro('A imagem deve ter no máximo 10MB');
       return;
     }
     setImagem(file);
     setImagemUrl(URL.createObjectURL(file));
     setPreview(URL.createObjectURL(file));
-    setErro('');
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setErro('');
     setCarregando(true);
-
     try {
       let urlFinal = imagemUrl;
 
@@ -59,9 +57,10 @@ export default function CriarPost() {
       }
 
       await postService.criar({ caoId: Number(caoId), descricao, imagemUrl: urlFinal });
+      sucesso('Post publicado com sucesso');
       navigate('/feed');
     } catch (err) {
-      setErro(err.response?.data?.mensagem || 'Erro ao criar post');
+      erro(err.response?.data?.mensagem || 'Erro ao criar post');
     } finally {
       setCarregando(false);
       setUploadando(false);
@@ -75,17 +74,11 @@ export default function CriarPost() {
           <h2 className="text-2xl font-bold text-gray-900">Criar post 📸</h2>
           <button
             onClick={() => navigate('/feed')}
-            className="text-sm text-gray-600 hover:text-instadog-600"
+            className="text-sm text-gray-600 hover:text-instadog-600 focus:outline-none focus:text-instadog-600"
           >
             Cancelar
           </button>
         </div>
-
-        {erro && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm mb-4">
-            {erro}
-          </div>
-        )}
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
@@ -93,10 +86,11 @@ export default function CriarPost() {
               Escolha o cão
             </label>
             <select
-              className="input-field"
+              className="input-field focus-visible-ring"
               value={caoId}
               onChange={(e) => setCaoId(e.target.value)}
               required
+              aria-label="Selecionar cão"
             >
               <option value="">Selecione um cão</option>
               {caos.map((cao) => (
@@ -112,12 +106,13 @@ export default function CriarPost() {
               Descrição
             </label>
             <textarea
-              className="input-field"
+              className="input-field focus-visible-ring"
               value={descricao}
               onChange={(e) => setDescricao(e.target.value)}
               rows={3}
               placeholder="O que seu cão está aprontando?"
               maxLength={500}
+              aria-label="Descrição do post"
             />
           </div>
 
@@ -130,16 +125,17 @@ export default function CriarPost() {
                 className="block w-full text-sm text-gray-500
                   file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0
                   file:text-sm file:font-semibold file:bg-instadog-50 file:text-instadog-700
-                  hover:file:bg-instadog-100"
+                  hover:file:bg-instadog-100 focus:outline-none"
                 type="file"
                 accept="image/*"
                 onChange={handleImagemChange}
+                aria-label="Enviar foto"
               />
               {preview && (
                 <div className="relative">
                   <img
                     src={preview}
-                    alt="Preview"
+                    alt="Pré-visualização da imagem"
                     className="w-24 h-24 rounded-lg object-cover border border-gray-300"
                   />
                   <button
@@ -149,8 +145,9 @@ export default function CriarPost() {
                       setImagemUrl('');
                       setPreview(null);
                     }}
-                    className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs hover:bg-red-600"
-                    title="Remover"
+                    className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500"
+                    title="Remover imagem"
+                    aria-label="Remover imagem"
                   >
                     ×
                   </button>

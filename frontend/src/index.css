@@ -10,7 +10,11 @@
 
 @layer components {
   .btn-primary {
-    @apply px-4 py-2 bg-instadog-600 text-white rounded-lg font-medium hover:bg-instadog-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
+    @apply px-4 py-2 bg-instadog-600 text-white rounded-lg font-medium hover:bg-instadog-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-instadog-300 focus:ring-offset-2;
+  }
+
+  .btn-outline {
+    @apply px-4 py-2 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-instadog-300 focus:ring-offset-2;
   }
 
   .btn-outline {
@@ -28,4 +32,23 @@
   .avatar {
     @apply w-12 h-12 rounded-full object-cover bg-gray-200;
   }
+}
+
+@keyframes slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-slide-in {
+  animation: slide-in 0.3s ease-out forwards;
+}
+
+.focus-visible-ring {
+  @apply focus:outline-none focus:ring-2 focus:ring-instadog-500 focus:ring-offset-2 rounded;
 }
