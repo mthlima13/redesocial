@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
-import { Logo } from '../components/Logo';
+import Logo from '../components/Logo';
 
 export default function Cadastro() {
   const [dados, setDados] = useState({
