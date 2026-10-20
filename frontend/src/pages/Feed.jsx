@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { postService } from '../services/posts';
@@ -12,18 +12,25 @@ export default function Feed() {
   const { user } = useAuth();
   const [posts, setPosts] = useState([]);
   const [page, setPage] = useState(0);
-  const [carregando, setCarregando] = useState(true);
+  // "carregando" marca o carregamento de páginas adicionais; o primeiro
+  // carregamento é controlado por "carregandoInicial".
+  const [carregando, setCarregando] = useState(false);
   const [carregandoInicial, setCarregandoInicial] = useState(true);
   const [temMais, setTemMais] = useState(true);
   const [abordagem, setAbordagem] = useState('todos'); // 'todos' | 'seguidos'
+  const [erro, setErro] = useState(null);
+  // Impede requisições duplicadas (o StrictMode do React executa o efeito duas vezes)
+  const carregandoRef = useRef(false);
 
   useEffect(() => {
     carregarFeed(0);
   }, [abordagem]);
 
   const carregarFeed = async (pagina) => {
-    if (carregando) return;
-    if (pagina === 0) {
+    if (carregandoRef.current) return;
+    carregandoRef.current = true;
+    const primeiraPagina = pagina === 0;
+    if (primeiraPagina) {
       setCarregandoInicial(true);
     } else {
       setCarregando(true);
@@ -38,17 +45,38 @@ export default function Feed() {
       }
       const res = await postService.listarFeed(params);
       const novos = res.data.content;
-      if (pagina === 0) {
-        setPosts(novos);
-      } else {
-        setPosts([...posts, ...novos]);
-      }
+      // Forma funcional: evita usar um estado antigo quando a resposta chega
+      setPosts((atual) => (primeiraPagina ? novos : [...atual, ...novos]));
       setTemMais(res.data.hasNext);
+      setPage(pagina);
+      setErro(null);
     } catch (e) {
       console.error(e);
+      setErro(e.response?.data?.mensagem || 'Não foi possível carregar o feed');
     } finally {
+      carregandoRef.current = false;
       setCarregando(false);
       setCarregandoInicial(false);
+    }
+  };
+
+  // Recarrega o feed já carregado depois de curtir, comentar ou seguir.
+  // Mantém a mesma quantidade de itens e não mostra skeleton no meio da ação.
+  const recarregarFeed = async () => {
+    try {
+      const params = {
+        page: 0,
+        size: (page + 1) * 10,
+      };
+      if (abordagem === 'seguidos') {
+        params.seguidos = 'true';
+      }
+      const res = await postService.listarFeed(params);
+      setPosts(res.data.content);
+      setTemMais(res.data.hasNext);
+      setErro(null);
+    } catch (e) {
+      console.error(e);
     }
   };
 
@@ -111,7 +139,17 @@ export default function Feed() {
 
       {carregandoInicial && renderSkeletons()}
 
-      {!carregandoInicial && posts.length === 0 && (
+      {!carregandoInicial && erro && (
+        <div className="bg-error-50 border border-error-100 text-error-700 px-4 py-3 rounded-lg text-sm mb-6">
+          <p className="font-medium mb-1">Não foi possível carregar o feed</p>
+          <p className="mb-3">{erro}</p>
+          <Button variant="outline" size="sm" onClick={() => carregarFeed(0)}>
+            Tentar novamente
+          </Button>
+        </div>
+      )}
+
+      {!carregandoInicial && !erro && posts.length === 0 && (
         <EmptyState
           icon="📭"
           title={
@@ -129,10 +167,10 @@ export default function Feed() {
         />
       )}
 
-      {!carregandoInicial && posts.length > 0 && (
+      {!carregandoInicial && !erro && posts.length > 0 && (
         <>
           {posts.map((post) => (
-            <PostCard key={post.id} post={post} onLikeChange={carregarFeed} />
+            <PostCard key={post.id} post={post} onLikeChange={recarregarFeed} />
           ))}
 
           {carregando && (

@@ -16,4 +16,6 @@ public interface CurtidaRepository extends JpaRepository<Curtida, Long> {
     long countByPostId(Long postId);
 
     void deleteByUsuarioIdAndPostId(Long usuarioId, Long postId);
+
+    void deleteByUsuarioId(Long usuarioId);
 }

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { postService } from '../services/posts';
+import { uploadService } from '../services/upload';
 import { caoService } from '../services/usuarios';
 import Button from '../components/ui/Button.jsx';
 import Input from '../components/ui/Input.jsx';
@@ -22,12 +23,9 @@ export default function CriarPost() {
   const [preview, setPreview] = useState(null);
 
   useEffect(() => {
-    // Lista cães do usuário (busca o primeiro cão cadastrado)
-    caoService.buscarPorId(1).then((res) => {
-      if (res.data) setCaos([res.data]);
-    }).catch(() => {
-      // Ignora erro se não houver cães ainda
-    });
+    caoService.listarMeus()
+      .then((res) => setCaos(res.data || []))
+      .catch((e) => console.error(e));
   }, []);
 
   const handleImagemChange = (e) => {
@@ -53,9 +51,9 @@ export default function CriarPost() {
       let urlFinal = imagemUrl;
 
       // Se há arquivo novo, faz upload no back-end primeiro
-      if (imagem && !imagemUrl.startsWith('http')) {
+      if (imagem) {
         setUploadando(true);
-        const res = await postService.uploadImagem(imagem);
+        const res = await uploadService.enviar(imagem);
         urlFinal = res.data.url;
       }
 
@@ -139,7 +137,7 @@ export default function CriarPost() {
                   <img
                     src={preview}
                     alt="Pré-visualização da imagem"
-                    className="w-24 h-24 rounded-lg object-cover border border-neutral-300"
+                    className="w-32 h-32 rounded-lg object-cover border border-neutral-300"
                   />
                   <button
                     type="button"

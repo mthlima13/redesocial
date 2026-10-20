@@ -4,12 +4,12 @@
 
 @layer base {
   :root {
-    --color-instadog-50: #f0fdfa;
-    --color-instadog-100: #ccfbf1;
-    --color-instadog-500: #14b8a6;
-    --color-instadog-600: #0d9488;
-    --color-instadog-700: #0f766e;
-    --color-instadog-900: #134e4a;
+    --color-instadog-50: #fdf8f4;
+    --color-instadog-100: #f8ebe0;
+    --color-instadog-500: #bd7849;
+    --color-instadog-600: #a45c33;
+    --color-instadog-700: #854a2a;
+    --color-instadog-900: #5b3522;
 
     --color-neutral-50: #fafafa;
     --color-neutral-100: #f5f5f5;
@@ -141,15 +141,15 @@
 
   /* == Avatar == */
   .avatar {
-    @apply w-10 h-10 rounded-full object-cover bg-neutral-200 border border-neutral-200;
+    @apply w-12 h-12 rounded-full object-cover bg-neutral-200 border border-neutral-200;
   }
 
   .avatar-sm {
-    @apply w-8 h-8;
+    @apply w-9 h-9;
   }
 
   .avatar-lg {
-    @apply w-16 h-16;
+    @apply w-20 h-20;
   }
 
   /* == Badge == */

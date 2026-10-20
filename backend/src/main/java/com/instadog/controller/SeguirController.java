@@ -1,5 +1,6 @@
 package com.instadog.controller;
 
+import com.instadog.dto.UsuarioResponse;
 import com.instadog.security.UserDetailsImpl;
 import com.instadog.service.SeguirService;
 import lombok.RequiredArgsConstructor;
@@ -42,5 +43,15 @@ public class SeguirController {
     public ResponseEntity<Long> contarSeguidores(@PathVariable Long usuarioId) {
         long count = seguirService.contarSeguidores(usuarioId);
         return ResponseEntity.ok(count);
+    }
+
+    @GetMapping("/seguidores/{usuarioId}")
+    public ResponseEntity<java.util.List<UsuarioResponse>> listarSeguidores(@PathVariable Long usuarioId) {
+        return ResponseEntity.ok(seguirService.listarSeguidores(usuarioId));
+    }
+
+    @GetMapping("/seguindo/{usuarioId}")
+    public ResponseEntity<java.util.List<UsuarioResponse>> listarSeguindo(@PathVariable Long usuarioId) {
+        return ResponseEntity.ok(seguirService.listarSeguindo(usuarioId));
     }
 }

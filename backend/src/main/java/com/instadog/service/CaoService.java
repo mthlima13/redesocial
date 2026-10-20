@@ -10,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -30,10 +32,30 @@ public class CaoService {
                 .dataNascimento(request.getDataNascimento())
                 .porte(request.getPorte())
                 .bio(request.getBio())
+                .fotoUrl(request.getFotoUrl())
                 .build();
 
         cao = caoRepository.save(cao);
         return toResponse(cao);
+    }
+
+    public List<CaoResponse> listarMeusCaos(Long usuarioId) {
+        if (!usuarioRepository.existsById(usuarioId)) {
+            throw new IllegalArgumentException("Usuário não encontrado");
+        }
+        return caoRepository.findByUsuarioId(usuarioId).stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
+    /** Cães de um tutor (usado no perfil público). */
+    public List<CaoResponse> listarPorUsuario(Long usuarioId) {
+        if (!usuarioRepository.existsById(usuarioId)) {
+            throw new IllegalArgumentException("Usuário não encontrado");
+        }
+        return caoRepository.findByUsuarioId(usuarioId).stream()
+                .map(this::toResponse)
+                .toList();
     }
 
     public CaoResponse buscarPorId(Long id) {
@@ -52,6 +74,7 @@ public class CaoService {
         cao.setDataNascimento(request.getDataNascimento());
         cao.setPorte(request.getPorte());
         cao.setBio(request.getBio());
+        cao.setFotoUrl(request.getFotoUrl());
 
         cao = caoRepository.save(cao);
         return toResponse(cao);

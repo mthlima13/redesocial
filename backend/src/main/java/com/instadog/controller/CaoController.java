@@ -29,9 +29,13 @@ public class CaoController {
 
     @GetMapping("/meus")
     public ResponseEntity<List<CaoResponse>> listarMeusCaos(@AuthenticationPrincipal UserDetailsImpl userDetails) {
-        // Retorna apenas o primeiro cão por simplicidade do MVP; pode ser expandido
-        List<CaoResponse> caos = List.of(caoService.buscarPorId(userDetails.getId()));
+        List<CaoResponse> caos = caoService.listarMeusCaos(userDetails.getId());
         return ResponseEntity.ok(caos);
+    }
+
+    @GetMapping("/usuario/{usuarioId}")
+    public ResponseEntity<List<CaoResponse>> listarPorUsuario(@PathVariable Long usuarioId) {
+        return ResponseEntity.ok(caoService.listarPorUsuario(usuarioId));
     }
 
     @GetMapping("/{id}")

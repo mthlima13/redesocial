@@ -1,5 +1,6 @@
 package com.instadog.service;
 
+import com.instadog.dto.UsuarioResponse;
 import com.instadog.entity.Seguir;
 import com.instadog.entity.Usuario;
 import com.instadog.repository.SeguirRepository;
@@ -59,5 +60,33 @@ public class SeguirService {
         return seguirRepository.findBySeguidorId(usuarioId).stream()
                 .map(s -> s.getSeguido().getId())
                 .toList();
+    }
+
+    /** Quem segue o usuário (a "lista de amigos" no estilo Orkut). */
+    public List<UsuarioResponse> listarSeguidores(Long usuarioId) {
+        return seguirRepository.findBySeguidoId(usuarioId).stream()
+                .map(Seguir::getSeguidor)
+                .map(this::toUsuarioResponse)
+                .toList();
+    }
+
+    /** Quem o usuário segue. */
+    public List<UsuarioResponse> listarSeguindo(Long usuarioId) {
+        return seguirRepository.findBySeguidorId(usuarioId).stream()
+                .map(Seguir::getSeguido)
+                .map(this::toUsuarioResponse)
+                .toList();
+    }
+
+    private UsuarioResponse toUsuarioResponse(Usuario usuario) {
+        UsuarioResponse response = new UsuarioResponse();
+        response.setId(usuario.getId());
+        response.setNome(usuario.getNome());
+        response.setEmail(usuario.getEmail());
+        response.setCidade(usuario.getCidade());
+        response.setBio(usuario.getBio());
+        response.setFotoUrl(usuario.getFotoUrl());
+        response.setCriadoEm(usuario.getCriadoEm());
+        return response;
     }
 }

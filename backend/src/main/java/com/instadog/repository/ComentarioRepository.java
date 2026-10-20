@@ -13,4 +13,6 @@ public interface ComentarioRepository extends JpaRepository<Comentario, Long> {
     Page<Comentario> findByPostIdOrderByCriadoEmDesc(Long postId, Pageable pageable);
 
     void deleteByPostId(Long postId);
+
+    void deleteByUsuarioId(Long usuarioId);
 }

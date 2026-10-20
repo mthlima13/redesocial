@@ -29,6 +29,15 @@
 - Stateless com JWT armazenado em `localStorage` no front-end
 - Filtro `JwtAuthFilter` extrai o token do header `Authorization: Bearer <token>`
 - Senhas hasheadas com BCrypt (`PasswordEncoder`)
+- Token inválido ou expirado não derruba a requisição: o filtro segue sem autenticar
+  e deixa a rota protegida retornar 401/403 normalmente
+- Ao carregar a página, o front busca `/usuarios/perfil` para restaurar a sessão
+  (o token continua no `localStorage`, mas o usuário precisa ser recarregado)
+
+### CORS
+- Configurado em `config/CorsConfig.java` via `CorsConfigurationSource`
+- Origens permitidas pela propriedade `instadog.cors.origins` (separadas por vírgula)
+- Em produção, definir `INSTADOG_CORS_ORIGINS` com o domínio do front-end
 
 ### Entidades principais
 - `Usuario`: tutor (login, perfil)
@@ -41,16 +50,40 @@
 ### Feed
 - Paginação com `Pageable` do Spring Data
 - Ordenação por data de criação decrescente
-- Feed global (todos os posts) — filtro por seguidos pode ser adicionado na Fase 4
+- Feed global (todos os posts) e feed de seguidos (`GET /api/posts?seguidos=true`)
 
 ### Upload de imagens
-- Preparado em `application.properties` (`spring.servlet.multipart.*`)
-- Integração com Cloudinary/S3 pode ser adicionada na Fase 1 (Sprint 2)
+- Endpoint genérico `POST /api/upload` (multipart, campo `file`), usado por
+  foto de perfil, foto do cão e imagem do post
+- Valida tipo (apenas `image/*`), tamanho (máx. 10MB) e extensão (whitelist)
+- Arquivos servidos estaticamente em `/uploads/**` (acesso público, sem token)
+- Em produção, trocar o disco local por Cloudinary/S3 (disco do Render é efêmero)
 
-## Próximos passos (Fase 1 cont.)
+### Exclusão de conta (LGPD)
+- `DELETE /api/usuarios/perfil` remove o usuário e suas dependências:
+  curtidas, comentários, posts e cães em cascade, e os vínculos de `seguir`
+
+### Seed de demonstração
+- `config/DemoData.java` guarda os dados fictícios (tutores, cães, publicações,
+  comentários, vínculos de seguir e recados) e `config/DataSeeder.java` grava tudo
+- Controlado por `instadog.seed.enabled` e `instadog.seed.reset`
+- As datas de criação são reposicionadas depois da inserção (SQL nativo), para
+  que o feed e o mural pareçam um histórico real em vez de tudo no mesmo instante
+- As fotos usam a API pública dog.ceo e os avatares o pravatar.cc
+
+### Recados (scraps) — perfil no estilo Orkut
+- Entidade `Scrap` com autor, destinatário, texto e data
+- `GET /api/scraps/usuario/{id}`, `POST /api/scraps/usuario/{id}`,
+  `DELETE /api/scraps/{id}` (só o autor apaga o próprio recado)
+- O perfil tem layout de duas colunas: menu de estatísticas/amigos/cães à
+  esquerda e o mural de recados à direita
+- Rota `/perfil/:usuarioId` para o perfil público de outro tutor, onde o
+  visitante pode deixar recados — como no Orkut
+
+## Próximos passos
 
 1. Instalar Maven: https://maven.apache.org/install.html
 2. Subir banco: `docker-compose up -d`
-3. Rodar back-end: `./mvnw spring-boot:run` (ou `mvn spring-boot:run`)
+3. Rodar back-end: `mvn spring-boot:run` (dentro de `backend/`)
 4. Rodar front-end: `cd frontend && npm install && npm run dev`
 5. Acessar Swagger: `http://localhost:8080/swagger-ui.html`

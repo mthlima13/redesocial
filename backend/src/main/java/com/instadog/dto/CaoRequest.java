@@ -22,6 +22,9 @@ public class CaoRequest {
     @Size(max = 500, message = "Bio deve ter no máximo 500 caracteres")
     private String bio;
 
+    @Size(max = 500, message = "URL da foto deve ter no máximo 500 caracteres")
+    private String fotoUrl;
+
     public String getNome() { return nome; }
     public void setNome(String nome) { this.nome = nome; }
 
@@ -36,4 +39,7 @@ public class CaoRequest {
 
     public String getBio() { return bio; }
     public void setBio(String bio) { this.bio = bio; }
+
+    public String getFotoUrl() { return fotoUrl; }
+    public void setFotoUrl(String fotoUrl) { this.fotoUrl = fotoUrl; }
 }

@@ -1,7 +1,7 @@
 package com.instadog.controller;
 
-import com.instadog.dto.UsuarioRequest;
 import com.instadog.dto.UsuarioResponse;
+import com.instadog.dto.UsuarioUpdateRequest;
 import com.instadog.security.UserDetailsImpl;
 import com.instadog.service.UsuarioService;
 import jakarta.validation.Valid;
@@ -23,10 +23,15 @@ public class UsuarioController {
         return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<UsuarioResponse> getPerfilPublico(@PathVariable Long id) {
+        return ResponseEntity.ok(usuarioService.buscarPorId(id));
+    }
+
     @PutMapping("/perfil")
     public ResponseEntity<UsuarioResponse> atualizarPerfil(
             @AuthenticationPrincipal UserDetailsImpl userDetails,
-            @Valid @RequestBody UsuarioRequest request) {
+            @Valid @RequestBody UsuarioUpdateRequest request) {
         UsuarioResponse response = usuarioService.atualizar(userDetails.getId(), request);
         return ResponseEntity.ok(response);
     }

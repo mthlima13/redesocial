@@ -1,6 +1,7 @@
-import { Heart, MessageCircle, UserPlus, Check, X, MoreHorizontal } from 'lucide-react';
+import { Heart, MessageCircle, UserPlus, UserMinus, MoreHorizontal } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 import { interacaoService, seguirService } from '../services/posts';
 import ComentarioCard from './ComentarioCard';
 import Button from './ui/Button.jsx';
@@ -9,6 +10,7 @@ import Badge from './ui/Badge.jsx';
 
 export default function PostCard({ post, onLikeChange }) {
   const { user } = useAuth();
+  const { sucesso, erro } = useToast();
   const [isLiked, setIsLiked] = useState(post.curtidoPorUsuarioLogado || false);
   const [likes, setLikes] = useState(post.curtidasCount || 0);
   const [comentariosAbertos, setComentariosAbertos] = useState(false);
@@ -76,8 +78,30 @@ export default function PostCard({ post, onLikeChange }) {
     try {
       await seguirService.seguir(post.usuarioId);
       setSeguindo(true);
+      sucesso(`Agora você segue ${post.usuarioNome}`);
     } catch (e) {
-      alert('Não foi possível seguir este usuário');
+      const mensagem = e.response?.data?.mensagem || '';
+      if (mensagem.includes('já segue')) {
+        // Já é seguidor (ex.: seguido em outra aba) — sincroniza o estado
+        setSeguindo(true);
+      } else {
+        erro('Não foi possível seguir este usuário');
+      }
+    }
+  };
+
+  const handleDeixarDeSeguir = async () => {
+    try {
+      await seguirService.deixarDeSeguir(post.usuarioId);
+      setSeguindo(false);
+      sucesso(`Você deixou de seguir ${post.usuarioNome}`);
+    } catch (e) {
+      const mensagem = e.response?.data?.mensagem || '';
+      if (mensagem.includes('não segue')) {
+        setSeguindo(false);
+      } else {
+        erro('Não foi possível deixar de seguir este usuário');
+      }
     }
   };
 
@@ -89,6 +113,7 @@ export default function PostCard({ post, onLikeChange }) {
       const res = await interacaoService.comentar(post.id, { texto: textoComentario });
       setComentarios([res.data, ...comentarios]);
       setTextoComentario('');
+      sucesso('Comentário publicado');
       onLikeChange?.();
     } catch (err) {
       setComentarioErro(err.response?.data?.mensagem || 'Erro ao comentar');
@@ -100,7 +125,7 @@ export default function PostCard({ post, onLikeChange }) {
       await interacaoService.excluirComentario(id);
       setComentarios(comentarios.filter((c) => c.id !== id));
     } catch (e) {
-      alert('Não foi possível excluir o comentário');
+      erro('Não foi possível excluir o comentário');
     }
   };
 
@@ -127,7 +152,12 @@ export default function PostCard({ post, onLikeChange }) {
         </div>
         {user && post.usuarioId !== user.id && seguindo === false && (
           <Button variant="primary" size="sm" onClick={handleSeguir}>
-            Seguir
+            <UserPlus className="w-4 h-4 mr-1" /> Seguir
+          </Button>
+        )}
+        {user && post.usuarioId !== user.id && seguindo === true && (
+          <Button variant="outline" size="sm" onClick={handleDeixarDeSeguir}>
+            <UserMinus className="w-4 h-4 mr-1" /> Seguindo
           </Button>
         )}
         {user && post.usuarioId !== user.id && seguindo === null && (
@@ -139,7 +169,7 @@ export default function PostCard({ post, onLikeChange }) {
         <img
           src={post.imagemUrl}
           alt="Post"
-          className="w-full h-64 object-cover bg-neutral-100 cursor-pointer hover:scale-[1.02] transition-transform duration-200"
+          className="w-full aspect-[4/5] md:aspect-[3/2] object-cover bg-neutral-100 cursor-pointer hover:scale-[1.02] transition-transform duration-200"
         />
       )}
 

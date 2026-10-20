@@ -1,19 +1,46 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import api from '../services/api';
 
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
-  const [token, setToken] = useState(localStorage.getItem('token'));
+  const [token, setToken] = useState(() => localStorage.getItem('token'));
   const [loading, setLoading] = useState(true);
 
+  // Restaura a sessão ao carregar a página (F5): o token continua no
+  // localStorage, mas o usuário precisa ser recarregado da API.
   useEffect(() => {
-    if (token) {
-      api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-    }
-    setLoading(false);
-  }, [token]);
+    let cancelado = false;
+
+    const restaurarSessao = async () => {
+      const tokenArmazenado = localStorage.getItem('token');
+      if (!tokenArmazenado) {
+        if (!cancelado) setLoading(false);
+        return;
+      }
+
+      try {
+        const res = await api.get('/usuarios/perfil');
+        if (!cancelado) setUser(res.data);
+      } catch (e) {
+        // Token inválido ou expirado: encerra a sessão silenciosamente
+        localStorage.removeItem('token');
+        if (!cancelado) {
+          setToken(null);
+          setUser(null);
+        }
+      } finally {
+        if (!cancelado) setLoading(false);
+      }
+    };
+
+    restaurarSessao();
+
+    return () => {
+      cancelado = true;
+    };
+  }, []);
 
   const login = async (email, senha) => {
     const res = await api.post('/auth/login', { email, senha });
@@ -21,7 +48,6 @@ export function AuthProvider({ children }) {
     localStorage.setItem('token', tk);
     setToken(tk);
     setUser(usuario);
-    api.defaults.headers.common['Authorization'] = `Bearer ${tk}`;
   };
 
   const cadastro = async (dados) => {
@@ -29,15 +55,20 @@ export function AuthProvider({ children }) {
     return res.data;
   };
 
-  const logout = () => {
+  const logout = useCallback(() => {
     localStorage.removeItem('token');
     setToken(null);
     setUser(null);
-    delete api.defaults.headers.common['Authorization'];
+  }, []);
+
+  const atualizarPerfil = async (dados) => {
+    const res = await api.put('/usuarios/perfil', dados);
+    setUser(res.data);
+    return res.data;
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, loading, login, cadastro, logout }}>
+    <AuthContext.Provider value={{ user, token, loading, login, cadastro, logout, atualizarPerfil }}>
       {children}
     </AuthContext.Provider>
   );

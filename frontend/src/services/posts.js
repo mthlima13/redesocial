@@ -3,15 +3,6 @@ import api from './api';
 export const postService = {
   listarFeed: (params) => api.get('/posts', { params }),
   criar: (dados) => api.post('/posts', dados),
-  uploadImagem: (file) => {
-    const formData = new FormData();
-    formData.append('file', file);
-    return api.post('/posts/upload', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
-  },
   buscarPorId: (id) => api.get(`/posts/${id}`),
   listarPorUsuario: (usuarioId, params) => api.get(`/posts/usuario/${usuarioId}`, { params }),
   excluir: (id) => api.delete(`/posts/${id}`),
@@ -29,4 +20,6 @@ export const seguirService = {
   deixarDeSeguir: (usuarioId) => api.delete(`/seguir/${usuarioId}`),
   isSeguindo: (usuarioId) => api.get(`/seguir/is-seguindo/${usuarioId}`),
   contarSeguidores: (usuarioId) => api.get(`/seguir/contar-seguidores/${usuarioId}`),
+  listarSeguidores: (usuarioId) => api.get(`/seguir/seguidores/${usuarioId}`),
+  listarSeguindo: (usuarioId) => api.get(`/seguir/seguindo/${usuarioId}`),
 };

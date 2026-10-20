@@ -60,6 +60,14 @@ function AppRouter() {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/perfil/:usuarioId"
+          element={
+            <ProtectedRoute>
+              <Perfil />
+            </ProtectedRoute>
+          }
+        />
         <Route path="/" element={<Navigate to="/feed" replace />} />
       </Routes>
     </BrowserRouter>
